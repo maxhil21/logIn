@@ -1,8 +1,3 @@
-/*
-i need to fix the deleting user, currently deleting a user keeps the user and adds a username identically but without a passcode.
-replace spot with null empty
- */
-
 import java.util.Scanner;
 import java.util.HashMap;
 import java.util.Map;
