@@ -1,47 +1,175 @@
+/*
+i need to fix the deleting user, currently deleting a user keeps the user and adds a username identically but without a passcode.
+replace spot with null empty
+ */
+
 import java.util.Scanner;
 import java.util.HashMap;
+import java.util.Map;
 import java.io.*;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
 
 public class hello {
-    public static void main (String[] args) {
 
-        HashMap<String, String> map = new HashMap<>();
-        Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) {
+        Map<String, String> users = new HashMap<>();
 
-        System.out.println("Login = 1\n" + "register = 2\n" + "quit = 3\n");
-        int logChoice = new scanner.next();
-        
+        try (Scanner scanner = new Scanner(System.in);
+             BufferedWriter writeFileBuffer = new BufferedWriter(new FileWriter("userInfo.txt", true));
+             BufferedReader readFileBuffer = new BufferedReader(new FileReader("userInfo.txt"))) {
 
-        try {
-            //establish the writer, reader, scanner, and hashmap
-            FileWriter writer = new FileWriter("userInfo.txt");
-            BufferedWriter WriteFileBuffer = new BufferedWriter(writer);
-            FileReader reader = new FileReader("userInfo.txt");
-            BufferedReader ReadFileBuffer = new BufferedReader(reader);
-
-            String tempLine;
-
-            while ((tempLine = ReadFileBuffer.readLine()) != null) {
-                map.put(tempLine, "newpass");
-                if (map.containsKey(tempLine)) {
-                    System.out.println("success");
+            // Load existing users
+            String temp;
+            while ((temp = readFileBuffer.readLine()) != null) {
+                String[] parts = temp.trim().split(":", 2);
+                if (parts.length == 2) {
+                    users.put(parts[0].toLowerCase(), parts[1]);
                 }
             }
 
-            //use the writer
-            System.out.println("Username?");
-            String input = scanner.next();
-            WriteFileBuffer.write(input + "\n");
-            WriteFileBuffer.close();
+            System.out.println("""
+                    Login = 1
+                    register = 2
+                    quit = 3
+                    """);
+            int logChoice = scanner.nextInt();
+            
+            if (logChoice == 1) {
+                System.out.println("enter username");
+                String username = scanner.next().toLowerCase();
+                String currentUser = username;
+                System.out.println("enter passcode");
+                String passcode = scanner.next();
+                
+                if (users.containsKey(username) && users.get(username).equals(passcode)) {
+                    System.out.println("Login successful!");
+                    userLogged(scanner, users, writeFileBuffer, currentUser);
+                } else {
+                    System.out.println("Incorrect username or password");
+                }
+                
+            } else if (logChoice == 2) {
+                registerUser(users, scanner, writeFileBuffer);
+            } else if (logChoice == 3) {
+                System.exit(0);
+            }
 
-            //catch exceptions
+        } catch (FileNotFoundException e) {
+            System.out.println("Creating new user database");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        //login
+    private static void deleteUser(Scanner scanner, Map<String, String> users, String currentUser) throws IOException {
+        System.out.println("enter your password");
+        String password = scanner.next();
+        if ((users.get(currentUser).equals(password))) {
+            System.out.println("what user should I delete?");
+            String deleteUser = scanner.next().trim().toLowerCase();
+            if (!users.containsKey(deleteUser)) {
+                System.out.println("User does not exist");
+            } else {
+                users.remove(deleteUser);
+                persistAllUsers(users);
+                System.out.println("successfully deleted");
+            }
+        } else {
+            System.out.println("wrong password");
+        }
 
     }
+
+    private static void changePassword(Scanner scanner, Map<String, String> users, String newPasscode, String currentUser) throws IOException {
+        System.out.println("confirm current password");
+        String passcode = scanner.next();
+        if ((!users.get(currentUser).equals(passcode))) {
+            System.out.println("wrong password");
+            changePassword(scanner, users, newPasscode, currentUser);
+        } else {
+            System.out.println("enter new password");
+            newPasscode = scanner.next();
+            System.out.println("confirm new password");
+            String newPasscodeTemp = scanner.next();
+            if (!newPasscode.equals(newPasscodeTemp)) {
+                System.out.println("passwords must match");
+                changePassword(scanner, users, newPasscode, currentUser);
+            }
+            users.put(currentUser, newPasscode);
+            persistAllUsers(users);
+            System.out.println("successfully changed password");
+        }
+    }
+
+    private static void persistAllUsers(Map<String, String> users) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("userInfo.txt", false))) {
+            for (Map.Entry<String, String> entry : users.entrySet()) {
+                writer.write(entry.getKey() + ":" + entry.getValue());
+                writer.newLine();
+            }
+            writer.flush();
+        }
+    }
+
+    private static void saveUser(String username, String passcode, BufferedWriter writer) throws IOException {
+        writer.write(username + ":" + passcode + "\n");
+        writer.flush();
+        System.out.println("User registered successfully");
+    }
+
+    private static void registerUser(Map<String, String> users, Scanner scanner, BufferedWriter writer) throws IOException {
+        System.out.println("new Username?");
+        String username = scanner.next().toLowerCase().trim();
+        
+        if (users.containsKey(username)) {
+            System.out.println("Username already exists");
+            return;
+        }
+        
+        System.out.println("new passcode");
+        String tempPasscode = scanner.next().trim();
+        System.out.println("confirm passcode");
+        String passcode = scanner.next().trim();
+
+        if (tempPasscode.equals(passcode)) {
+            users.put(username, passcode);
+            saveUser(username, passcode, writer);
+        } else {
+            System.out.println("passcodes must match");
+        }
+    }
+
+    private static void userLogged(Scanner scanner, Map<String, String> users, BufferedWriter writer, String currentUser) throws IOException {
+
+        System.out.println("How can I help you?\n\n");
+
+        System.out.println("""
+                delete user(AUTH REQUIRED) 1.
+                add log entry 2.
+                change password 3.
+                logout 4.
+                """);
+        int loggedChoice = scanner.nextInt();
+        switch (loggedChoice) {
+            case 1:
+                deleteUser(scanner, users, currentUser);
+                break;
+
+            case 2:
+                System.out.println("enter log entry");
+                String logEntry = scanner.next();
+                System.out.println("thank you");
+                break;
+
+            case 3:
+                String newPasscode = "";
+                changePassword(scanner, users, newPasscode, currentUser);
+                break;
+
+            case 4:
+                System.out.println("goodbye");
+                System.exit(0);
+                break;
+        }
+    }
+
 }
