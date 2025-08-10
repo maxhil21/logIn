@@ -5,6 +5,7 @@ import java.io.*;
 
 public class hello {
 
+    // Main method
     public static void main(String[] args) {
         Map<String, String> users = new HashMap<>();
 
@@ -54,7 +55,7 @@ public class hello {
             e.printStackTrace();
         }
     }
-
+    // Delete user method
     private static void deleteUser(Scanner scanner, Map<String, String> users, String currentUser) throws IOException {
         System.out.println("enter your password");
         String password = scanner.next();
@@ -73,7 +74,7 @@ public class hello {
         }
 
     }
-
+    // Change password method
     private static void changePassword(Scanner scanner, Map<String, String> users, String newPasscode, String currentUser) throws IOException {
         System.out.println("confirm current password");
         String passcode = scanner.next();
@@ -94,7 +95,7 @@ public class hello {
             System.out.println("successfully changed password");
         }
     }
-
+    // method to keep all users on other methods
     private static void persistAllUsers(Map<String, String> users) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("userInfo.txt", false))) {
             for (Map.Entry<String, String> entry : users.entrySet()) {
@@ -104,13 +105,13 @@ public class hello {
             writer.flush();
         }
     }
-
+    // Save a newly registered user method
     private static void saveUser(String username, String passcode, BufferedWriter writer) throws IOException {
         writer.write(username + ":" + passcode + "\n");
         writer.flush();
         System.out.println("User registered successfully");
     }
-
+    // register a new user method
     private static void registerUser(Map<String, String> users, Scanner scanner, BufferedWriter writer) throws IOException {
         System.out.println("new Username?");
         String username = scanner.next().toLowerCase().trim();
@@ -132,7 +133,7 @@ public class hello {
             System.out.println("passcodes must match");
         }
     }
-
+    // methods for logged in users
     private static void userLogged(Scanner scanner, Map<String, String> users, BufferedWriter writer, String currentUser) throws IOException {
 
         System.out.println("How can I help you?\n\n");
