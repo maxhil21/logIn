@@ -38,7 +38,7 @@ public class hello {
                 
                 if (users.containsKey(username) && users.get(username).equals(passcode)) {
                     System.out.println("Login successful!");
-                    userLogged(scanner, users, writeFileBuffer, currentUser);
+                    userLogged(scanner, users, currentUser);
                 } else {
                     System.out.println("Incorrect username or password");
                 }
@@ -134,7 +134,7 @@ public class hello {
         }
     }
     // methods for logged in users
-    private static void userLogged(Scanner scanner, Map<String, String> users, BufferedWriter writer, String currentUser) throws IOException {
+    private static void userLogged(Scanner scanner, Map<String, String> users, String currentUser) throws IOException {
 
         System.out.println("How can I help you?\n\n");
 
