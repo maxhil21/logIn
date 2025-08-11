@@ -30,19 +30,7 @@ public class hello {
             int logChoice = scanner.nextInt();
             
             if (logChoice == 1) {
-                System.out.println("enter username");
-                String username = scanner.next().toLowerCase();
-                String currentUser = username;
-                System.out.println("enter passcode");
-                String passcode = scanner.next();
-                
-                if (users.containsKey(username) && users.get(username).equals(passcode)) {
-                    System.out.println("Login successful!");
-                    userLogged(scanner, users, currentUser);
-                } else {
-                    System.out.println("Incorrect username or password");
-                }
-                
+                logIn(scanner, users);
             } else if (logChoice == 2) {
                 registerUser(users, scanner, writeFileBuffer);
             } else if (logChoice == 3) {
@@ -131,6 +119,23 @@ public class hello {
             saveUser(username, passcode, writer);
         } else {
             System.out.println("passcodes must match");
+        }
+    }
+
+    private static void logIn(Scanner scanner, Map<String, String> users) throws IOException {
+
+        System.out.println("enter username");
+        String username = scanner.next().toLowerCase();
+        String currentUser = username;
+        System.out.println("enter passcode");
+        String passcode = scanner.next();
+
+        if (users.containsKey(username) && users.get(username).equals(passcode)) {
+            System.out.println("Login successful!");
+            userLogged(scanner, users, currentUser);
+        } else {
+            System.out.println("Incorrect username or password");
+            logIn(scanner, users);
         }
     }
     // methods for logged in users
